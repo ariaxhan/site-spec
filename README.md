@@ -1,33 +1,66 @@
 # site-spec
 
-> **Audit any website's invisible foundations — AI searchability, SEO, structured data, accessibility, and privacy.**
+> **Audit any website's invisible foundations — SEO, accessibility, privacy, structured data, performance, and AI searchability.**
 
 [![CI](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-Every website has a layer you can't see in the browser: the machine-readable
-foundation that decides whether **Google, ChatGPT, Claude, and Perplexity can
-find, read, and cite you** — your `robots.txt` crawler policy, your `llms.txt`,
-your structured data, your response headers, your accessibility semantics.
+Every website has a layer you never see in the browser: the machine-readable
+foundation that decides how it's ranked, read, rendered, and trusted — your
+`robots.txt`, structured data, response headers, canonical/`noindex` signals,
+accessibility semantics, tracker and cookie surface, and more. Most of it is
+invisible until it's quietly costing you traffic, breaking your social previews,
+or exposing you to a privacy complaint.
 
-Most of it is invisible until it's wrong. site-spec points at a live URL,
-crawls the site, and reports exactly what's missing, stale, or quietly breaking:
+site-spec points at a live URL, crawls the site, and reports exactly what's
+missing, stale, or broken — with a concrete fix for each finding:
 
 ```bash
 npx site-spec audit https://yoursite.com
 ```
 
 No account, no API key, no SaaS. It fetches the real pages and the real HTTP
-response headers, follows the sitemap, and runs a battery of checks against what
-crawlers and AI agents actually see.
+response headers, follows the sitemap, and audits what crawlers and agents
+actually see.
 
 ---
 
-## The thing everyone's getting wrong right now: AI searchability
+## What it checks
 
-AI answer engines read your site through the same machine layer search crawlers
-do — and a lot of sites are accidentally invisible to them. site-spec flags the
-exact failure modes:
+Seven areas, each check tuned against false positives (regex/string-level — no
+headless browser needed for the crawl). Findings are `error` (breaks something)
+or `warning` (worth a look), each with a concrete fix.
+
+| Area | What it catches |
+| --- | --- |
+| **SEO / findability** | missing `<title>` / description / canonical · accidental `noindex` (both `<meta robots>` and the `X-Robots-Tag` header) · missing Open Graph cards (links unfurl as bare URLs) · zero-or-many `<h1>` · a sitemap that lists pages which don't exist |
+| **Accessibility** | images with no `alt` · zoom-blocking viewport (`user-scalable=no`) · images with no width/height (layout shift) |
+| **Privacy & security** | mixed content (`http://` asset on an `https://` page) · trackers + cookies with no consent/disclosure story · Google Fonts loaded from Google's CDN (a ruled GDPR violation) · header hygiene (HSTS preload risk, report-only CSP that reports nowhere, dead FLoC / `X-XSS-Protection` config) · inline `onclick=` handlers that block a future CSP |
+| **Performance** | hero/LCP image set to `loading="lazy"` · no `Cache-Control` |
+| **Structured data** | invalid JSON-LD (crawlers drop the whole block) · self-serving `aggregateRating`/`review` markup (a Google penalty since 2019) |
+| **Integrity** | dangling assets that 404 · broken internal links |
+| **AI searchability** | `robots.txt` blocking AI answer agents · dead crawler tokens · missing `llms.txt` · missing/broken structured data · client-rendered shells AI crawlers see as blank |
+
+Run it against a live site, or against a build output directory:
+
+```bash
+site-spec audit https://yoursite.com        # crawl a live site
+site-spec audit ./dist                        # audit a build/output folder
+site-spec audit https://yoursite.com --json   # machine-readable report
+site-spec audit https://yoursite.com --max 50 # crawl up to 50 pages
+```
+
+Exit code is non-zero when there are errors — drop it into CI to gate deploys.
+
+---
+
+## The sharp edge: AI searchability
+
+Most SEO tools cover the first six areas. The one almost nobody checks yet is the
+last: whether **Google, ChatGPT, Claude, and Perplexity** can actually find,
+read, and cite you — because AI answer engines read your site through the same
+machine layer crawlers do, and a lot of sites are accidentally invisible to them.
+site-spec flags the exact failure modes:
 
 - **`robots.txt` blocking AI search agents.** Blocking `OAI-SearchBot`,
   `ChatGPT-User`, `Claude-User`, `Claude-SearchBot`, `PerplexityBot`, or
@@ -42,34 +75,9 @@ exact failure modes:
   bundle looks blank to AI crawlers and no-JS clients. site-spec flags pages with
   almost no server-rendered text.
 
----
-
-## What it checks
-
-Every check is regex/string-level and tuned against false positives — no
-headless browser needed for the crawl. Findings are `error` (breaks something) or
-`warning` (worth a look), each with a concrete fix.
-
-| Area | Examples |
-| --- | --- |
-| **AI searchability** | robots.txt AI-agent policy · stale crawler tokens · `llms.txt` presence · JSON-LD presence + validity · empty server-rendered body |
-| **SEO** | `<title>` · meta description · canonical · sitemap↔page honesty · accidental `noindex` (meta + `X-Robots-Tag`) · Open Graph cards · single `<h1>` |
-| **Structured data** | JSON-LD parses · Google's self-serving `aggregateRating`/`review` penalty (prohibited since 2019) |
-| **Accessibility** | missing `alt` · zoom-blocking viewport · images without dimensions (layout shift) |
-| **Privacy & security** | trackers + cookies (consent/disclosure) · mixed content · inline handlers vs CSP · HSTS/CSP/`X-XSS-Protection`/`Permissions-Policy` header hygiene · Google Fonts CDN (GDPR) |
-| **Performance** | lazy-loaded LCP image · missing `Cache-Control` |
-| **Integrity** | dangling assets · broken internal links (local-dir mode) |
-
-Run it against a live site, or against a build output directory:
-
-```bash
-site-spec audit https://yoursite.com        # crawl a live site
-site-spec audit ./dist                        # audit a build/output folder
-site-spec audit https://yoursite.com --json   # machine-readable report
-site-spec audit https://yoursite.com --max 50 # crawl up to 50 pages
-```
-
-Exit code is non-zero when there are errors — drop it into CI to gate deploys.
+It's the timely edge — not the whole story. The point is a **complete**
+foundation audit; AI searchability is the part the rest of the field hasn't
+caught up to.
 
 ---
 
