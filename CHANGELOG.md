@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-07-14
+
+The auditor becomes an auditor **and fixer**, and the project sharpens to a single
+purpose: verify and repair the invisible foundation of any website.
+
+### Added
+
+- **`site-spec fix <url|dir>`** — audits, then repairs. Every finding is sorted
+  into one of three buckets, printed as a clear report:
+  - **Fixed automatically** — mechanical, fact-free repairs (unblock AI crawlers,
+    remove dead robots tokens, strip accidental `noindex`, add canonical, scaffold
+    Open Graph, unlock zoom-blocked viewports, remove self-serving rating markup,
+    generate `sitemap.xml` from crawled pages, header hygiene).
+  - **Scaffolded** — `TODO` stubs for things that need real facts (`llms.txt`,
+    JSON-LD entity, meta description).
+  - **Manual** — a precise instruction where no tool should silently guess
+    (missing `alt`, self-hosting fonts, broken links, client-rendered shells).
+  Non-destructive by default (writes to an output dir); `--write` edits a local
+  directory in place. Refuses `--write` in URL mode.
+- **`audit --report <file>`** — write the audit as a shareable Markdown document.
+
+### Changed
+
+- **Deterministic crawl:** discovered pages are now sorted before the `--max` cap
+  is applied, so the same site at the same cap audits the same page set every run,
+  regardless of fetch timing.
+- **Positioning sharpened:** site-spec is now a website-foundation **auditor +
+  fixer**, source-agnostic (AI, framework, CMS, or hand-coded). The deterministic
+  compiler (`build`) is retained but is no longer the identity of the project.
+
 ## [0.2.0] — 2026-07-13
 
 Audit any live website. The auditor becomes the headline capability.

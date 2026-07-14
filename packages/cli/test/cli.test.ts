@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { runBuild } from "../src/commands/build";
 import { runAudit } from "../src/commands/audit";
 import { runHandoff } from "../src/commands/handoff";
-import { pathToKey, synthesizeHeaders } from "../src/fetch-site";
+import { pathToKey, synthesizeHeaders, selectCrawlSet } from "../src/fetch-site";
 
 /**
  * The CLI's command functions are importable library code (package-first);
@@ -82,6 +82,22 @@ describe("fetch-site pure helpers (offline)", () => {
 
   it("synthesizeHeaders on an empty header set is just the wildcard block", () => {
     expect(synthesizeHeaders({})).toBe("/*\n");
+  });
+
+  it("selectCrawlSet sorts by pathname THEN caps (deterministic under any input order)", () => {
+    const urls = [
+      "https://x.com/c",
+      "https://x.com/a",
+      "https://x.com/b",
+      "https://x.com/a/deep",
+    ];
+    // same set, different input order → same capped subset
+    const shuffled = [urls[2]!, urls[0]!, urls[3]!, urls[1]!];
+    expect(selectCrawlSet(urls, 2)).toEqual(["https://x.com/a", "https://x.com/a/deep"]);
+    expect(selectCrawlSet(shuffled, 2)).toEqual(selectCrawlSet(urls, 2));
+    // cap of 0 and over-cap are safe
+    expect(selectCrawlSet(urls, 0)).toEqual([]);
+    expect(selectCrawlSet(urls, 99)).toHaveLength(4);
   });
 });
 

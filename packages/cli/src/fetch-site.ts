@@ -28,6 +28,29 @@ export function pathToKey(pathname: string): string {
 }
 
 /**
+ * Deterministic crawl selection: sort candidate URLs by pathname (stable, ties
+ * broken by full href) THEN cap. So the same site + same maxPages always audits
+ * the same page set regardless of fetch timing/concurrency. Pure.
+ */
+export function selectCrawlSet(urls: string[], remaining: number): string[] {
+  const key = (u: string): string => {
+    try {
+      return new URL(u).pathname;
+    } catch {
+      return u;
+    }
+  };
+  const sorted = [...urls].sort((a, b) => {
+    const ka = key(a);
+    const kb = key(b);
+    if (ka < kb) return -1;
+    if (ka > kb) return 1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  return sorted.slice(0, Math.max(0, remaining));
+}
+
+/**
  * Turn HTTP response headers into a Cloudflare/Netlify-style `_headers` body so
  * the engine's header checks run against the REAL response. Pure.
  */
@@ -103,6 +126,7 @@ export async function fetchSite(
   opts?: { maxPages?: number },
 ): Promise<{
   files: Record<string, string | null>;
+  pageUrls: Record<string, string>;
   meta: { origin: string; startUrl: string; fetched: string[]; errors: string[] };
 }> {
   const maxPages = opts?.maxPages ?? 25;
@@ -111,6 +135,7 @@ export async function fetchSite(
   const origin = startUrl.origin;
 
   const files: Record<string, string | null> = {};
+  const pageUrls: Record<string, string> = {};
   const fetched: string[] = [];
   const errors: string[] = [];
 
@@ -122,6 +147,7 @@ export async function fetchSite(
   if (isHtml(start) && typeof start.body === "string") {
     const startPath = new URL(start.finalUrl).pathname;
     files[pathToKey(startPath)] = start.body;
+    pageUrls[pathToKey(startPath)] = `${origin}${startPath}`;
     fetched.push(startPath);
   }
 
@@ -198,7 +224,8 @@ export async function fetchSite(
   if (queue.length > remaining) {
     errors.push(`crawl capped at ${maxPages} pages (${discovered} discovered)`);
   }
-  const toFetch = queue.slice(0, remaining);
+  // sort-then-cap so the capped subset is deterministic under concurrency
+  const toFetch = selectCrawlSet(queue, remaining);
 
   // 5. fetch the crawl set with small concurrency (≤4 in flight)
   const CONCURRENCY = 4;
@@ -211,6 +238,7 @@ export async function fetchSite(
       if (!isHtml(r) || typeof r.body !== "string") continue;
       const path = new URL(r.finalUrl).pathname;
       files[pathToKey(path)] = r.body;
+      pageUrls[pathToKey(path)] = `${origin}${path}`;
       fetched.push(path);
     }
   };
@@ -224,5 +252,5 @@ export async function fetchSite(
     errors.push("soft 404: unknown paths return 200");
   }
 
-  return { files, meta: { origin, startUrl: startUrl.href, fetched, errors } };
+  return { files, pageUrls, meta: { origin, startUrl: startUrl.href, fetched, errors } };
 }

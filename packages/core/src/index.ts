@@ -53,6 +53,12 @@ export { packRegistry, getPack } from "./packs/registry";
 // Audit (inspect any static output dir: file map in, findings out)
 export { auditFiles } from "./audit/audit";
 export type { AuditInput, AuditFinding, AuditReport } from "./audit/audit";
+export { renderAuditMarkdown } from "./audit/report-md";
+export type { AuditMarkdownOptions } from "./audit/report-md";
+
+// Fix (repair the mechanical findings; scaffold/flag the rest)
+export { fixFiles } from "./fix/fix";
+export type { FixStatus, FixAction, FixResult, FixInput } from "./fix/fix";
 
 // Frontend handoff contract (what a design agent receives)
 export { buildHandoff, COMPILER_OWNED } from "./handoff/handoff";

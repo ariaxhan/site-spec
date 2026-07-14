@@ -1,21 +1,25 @@
 # Contributing to site-spec
 
-Thanks for your interest. site-spec is a deterministic website compiler, and the
-contribution bar exists to protect that determinism. Read
-[`docs/design-philosophy.md`](./docs/design-philosophy.md) before proposing
-architectural changes.
+Thanks for your interest. site-spec audits and repairs the invisible foundation
+of any website. The most valuable contributions are **new checks** and **new
+fixers** — and the bar exists to keep them trustworthy.
 
 ## Ground rules (non-negotiable)
 
-1. **Determinism.** Same spec + same pack must produce byte-identical output.
-   No wall-clock time, randomness, or network access in the render path.
-2. **The engine stays generic.** All vertical/industry knowledge lives in a
-   **Pack**. Never teach the core what a restaurant (or any business) is.
-3. **No raw HTML in sections.** Compose UI primitives (`ui.*`). They carry the
-   accessibility, escaping, and lazy-loading guarantees.
-4. **Everything factual traces to the Brief.** Do not let a section invent facts.
-5. **Do not pull generation ahead of specification.** Generation is the last
-   milestone by design.
+1. **The engine is pure and deterministic.** `@site-spec/core` never touches the
+   network or filesystem. Same input file map → the same report and the same
+   fixes, byte-for-byte. All I/O lives in the CLI.
+2. **Checks are tuned against false positives.** A check that cries wolf on
+   healthy sites is worse than no check. When something can't be decided reliably
+   from the served markup/headers, it's a `warning`, not an `error` — or it isn't
+   a check.
+3. **A fixer never silently guesses.** Only apply an automatic fix when it's
+   mechanical and safe (no real-world facts required). Anything needing facts is
+   *scaffolded* with clear `TODO`s; anything a human must decide is reported as
+   *manual* — never edited behind their back.
+4. **Every finding carries a concrete fix string**, and (where safe) a fixer.
+5. **Source-agnostic.** Checks audit the served output, not any particular
+   toolchain. Don't assume a site was built by site-spec.
 6. **No AI/authorship attribution** in commits, PRs, code comments, or any
    committed artifact.
 
@@ -44,17 +48,21 @@ UPDATE_GOLDEN=1  npx vitest run packages/core/test/golden.test.ts
 
 Commit the regenerated `examples/` and `sites/` alongside the code change.
 
-## Adding a pack (a new vertical)
+## Adding a check or a fixer
 
-A pack is a versioned design system + section set. Use the existing
-`packages/core/src/packs/restaurant` and `.../catering` packs as references.
-Every pack must:
+Checks live in `packages/core/src/audit/audit.ts`; fixers in
+`packages/core/src/fix/fix.ts`. A good addition:
 
-- register its sections and declare its theme tokens (no inline CSS);
-- pass all policies (SEO, a11y, security, grounding);
-- ship a fixture and a golden output directory;
-- use only fictional, non-identifying demo data (fictional business names,
-  `555-01xx` phone numbers, `.example` domains — never real business data).
+- decides purely from the served HTML/headers/robots/sitemap in the file map — no
+  network, no DOM, no headless browser;
+- is tuned against false positives (see ground rule 2);
+- emits a `checkId`, a severity, and a concrete `fix` string;
+- if it's safely auto-fixable, adds a fixer that classifies as `fixed`,
+  `scaffolded`, or `manual` (ground rule 3);
+- ships offline unit tests for both the check and the fixer.
+
+The legacy compiler (`packages/core/src/packs/*`, `build`) is retained but is not
+where new work should go — see `docs/design-philosophy.md` for that history.
 
 ## Pull requests
 
