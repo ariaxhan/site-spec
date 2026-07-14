@@ -1,0 +1,19 @@
+{
+  "name": "Sunny Table Catering",
+  "short_name": "Sunny Table Catering",
+  "description": "Authentic Korean home cooking for your most special moments — no MSG, made fresh daily. Catering, lunch boxes, premium side dishes, and OC & LA delivery.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#f2f0eb",
+  "theme_color": "#f2f0eb",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Sunny Table Catering
+
+> Authentic Korean home cooking for your most special moments — no MSG, made fresh daily. Catering, lunch boxes, premium side dishes, and OC & LA delivery.
+
+Sunny Table Catering is a Korean catering.
+
+## Contact
+- Phone: +1 555 010 0142
+- Email: hello@sunnytable.example
+- Address: 128 Garden Ave, Springfield, CA 90000
+
+## Pages
+- [Sunny Table Catering — Fresh & Authentic Korean Home Cooking](https://sunnytable.example/)

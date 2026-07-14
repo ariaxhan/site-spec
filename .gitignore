@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.pnp.cjs
+
+# Build output (root-anchored where a bare pattern could swallow src dirs —
+# a bare "build/" silently ignored packages/core/src/build/)
+dist/
+/build/
+/out/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.vitest/
+
+# Caches
+.cache/
+.turbo/
+.eslintcache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+dist-types/

@@ -1,0 +1,27 @@
+{
+  "name": "@site-spec/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Command-line front door for @site-spec/core: build, audit, handoff.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Aria Han",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ariaxhan/site-spec.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "site-spec": "./dist/cli.mjs"
+  },
+  "scripts": {
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --banner:js='#!/usr/bin/env node' --outfile=dist/cli.mjs && chmod +x dist/cli.mjs",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@site-spec/core": "*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

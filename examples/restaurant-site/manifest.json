@@ -1,0 +1,19 @@
+{
+  "name": "Rosalia's Kitchen",
+  "short_name": "Rosalia's Kitchen",
+  "description": "Family-run Italian kitchen in downtown Sunnyvale. Fresh pasta, wood-fired classics, and a warm room.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#faf6f0",
+  "theme_color": "#faf6f0",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

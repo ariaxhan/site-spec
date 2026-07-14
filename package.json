@@ -1,0 +1,64 @@
+{
+  "name": "site-spec",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A deterministic compiler for AI-generated websites. The SiteSpec is the artifact; HTML is one compiled output.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Aria Han",
+  "homepage": "https://github.com/ariaxhan/site-spec#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ariaxhan/site-spec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ariaxhan/site-spec/issues"
+  },
+  "keywords": [
+    "website-compiler",
+    "sitespec",
+    "static-site-generator",
+    "deterministic",
+    "ai",
+    "llm",
+    "anti-slop",
+    "seo",
+    "accessibility",
+    "structured-data"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example": "UPDATE_GOLDEN=1 vitest run packages/core/test/golden.test.ts && vitest run packages/core/test/golden.test.ts",
+    "verify:html": "html-validate 'examples/*-site/index.html' 'examples/*-site/404.html'",
+    "verify:jsonld": "node tools/validate-jsonld.mjs",
+    "verify:a11y": "node tools/axe-scan.mjs",
+    "verify": "npm run verify:html && npm run verify:jsonld && npm run verify:a11y",
+    "clean": "tsc -b --clean"
+  },
+  "overrides": {
+    "schemarama": {
+      "axios": "^1.12.0",
+      "jsonld": "^9.0.0"
+    }
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^4.1.8",
+    "html-validate": "^11.5.3",
+    "playwright": "^1.60.0",
+    "schemarama": "^0.0.4",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.8"
+  }
+}

@@ -1,0 +1,17 @@
+# Rosalia's Kitchen
+
+> Family-run Italian kitchen in downtown Sunnyvale. Fresh pasta, wood-fired classics, and a warm room.
+
+Rosalia's Kitchen is a Italian restaurant.
+
+## Contact
+- Phone: +14085550142
+- Email: hello@rosalias.example
+- Address: 118 S Murphy Ave, Sunnyvale, CA 94086
+
+## Pages
+- [Rosalia's Kitchen — Italian in Sunnyvale](https://rosalias.example/)
+
+## Languages
+- en: https://rosalias.example/
+- es: https://rosalias.example/es/

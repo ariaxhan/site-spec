@@ -1,0 +1,21 @@
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-R5xCnA94OHvHTTTvMTazDiuCeqEVUU307taXPXUOp+8=' 'sha256-gXSzJP+j/grmgJKx9hwEYWRGhK1MTKbvZIObxJt72r4=' 'sha256-z392PdKjQVGoTI6KaEya28uq0iTO6G4IbKJifKxCOPY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self' mailto:; frame-ancestors 'none'; upgrade-insecure-requests
+  Cross-Origin-Opener-Policy: same-origin
+  X-XSS-Protection: 0
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

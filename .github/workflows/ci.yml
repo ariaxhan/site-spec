@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test (includes golden byte-exact gate)
+        run: npm test
+
+      - name: Validate HTML (html-validate over every golden site)
+        run: npm run verify:html
+
+      - name: Validate structured data (JSON-LD parse + schema.org vocabulary + shape)
+        run: npm run verify:jsonld
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate accessibility (axe-core, 375px + 1440px, serious/critical gate)
+        run: npm run verify:a11y
+
+      - name: Audit (high+)
+        run: npm audit --audit-level=high

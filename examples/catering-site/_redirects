@@ -1,0 +1,2 @@
+# Redirect rules (Cloudflare Pages / Netlify format): from to status.
+# None declared means none needed, this file existing IS the decision.

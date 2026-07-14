@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- A deliberately awful "vibe-coded" page: gorgeous on the surface, hollow
+     underneath. Every defect here is intentional and pinned by audit.test.ts
+     if you "fix" this file, the auditor loses its regression fixture. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, follow">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="icon" href="/favicon.png">
+  <script src="http://cdn.sketchy.example/analytics-lite.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FAKE123"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    document.cookie = "visitor_id=" + Math.random() + "; max-age=31536000";
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+    .hero { min-height: 90vh; display: grid; place-items: center; text-align: center; }
+    .hero h1 { font-size: 4rem; margin: 0; }
+    .cta { background: #fff; color: #667eea; padding: 1rem 2.5rem; border-radius: 999px; text-decoration: none; font-weight: 700; }
+    .logo { background: url('/img/logo-mark.svg') no-repeat; width: 48px; height: 48px; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div>
+      <div class="logo"></div>
+      <h1>Nimbus Consulting</h1>
+      <h1 class="sub">10+ years of AI excellence</h1>
+      <p>We turn your data into gold. Trusted by 500+ Fortune companies.</p>
+      <img src="/img/team-photo.jpg">
+      <a class="cta" href="/contact" onclick="trackClick()">Book a call</a>
+      <a href="/about">About us</a>
+    </div>
+  </div>
+  <form class="newsletter">
+    <input type="email" placeholder="Your email">
+    <button>Subscribe</button>
+  </form>
+</body>
+</html>
