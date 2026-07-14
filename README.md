@@ -161,8 +161,8 @@ npm run verify    # html-validate + JSON-LD + axe over the demo output
 
 | Package             | Responsibility                                                       |
 | ------------------- | ------------------------------------------------------------------- |
-| `@site-spec/core`   | The pure engine: audit checks, the fixers, the policy definitions (and the legacy compiler) |
-| `@site-spec/cli`    | `audit` · `fix` · `build`                                            |
+| [`site-spec`](https://www.npmjs.com/package/site-spec) (npm) | The published CLI — `audit` · `fix` · `build`. Self-contained; this is what `npx site-spec` runs. |
+| `@site-spec/core`   | The pure engine (audit checks, fixers, policy definitions, legacy compiler). Bundled into the CLI; not separately published yet. |
 
 ## Contributing
 

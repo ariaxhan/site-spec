@@ -1,8 +1,7 @@
 {
-  "name": "@site-spec/cli",
+  "name": "site-spec",
   "version": "0.3.0",
-  "private": true,
-  "description": "Command-line front door for @site-spec/core: audit (dir or url), build, handoff.",
+  "description": "Audit any website’s invisible foundation (SEO, accessibility, privacy, structured data, AI searchability) and auto-fix what’s broken.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Aria Han",
@@ -16,12 +15,28 @@
   },
   "scripts": {
     "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --banner:js='#!/usr/bin/env node' --outfile=dist/cli.mjs && chmod +x dist/cli.mjs",
-    "typecheck": "tsc -b"
-  },
-  "dependencies": {
-    "@site-spec/core": "*"
+    "typecheck": "tsc -b",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@site-spec/core": "*",
     "esbuild": "^0.25.0"
+  },
+  "keywords": [
+    "website-audit",
+    "website-fixer",
+    "seo-audit",
+    "ai-searchability",
+    "llms-txt",
+    "robots-txt",
+    "structured-data",
+    "accessibility",
+    "cli"
+  ],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

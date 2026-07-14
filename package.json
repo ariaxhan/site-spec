@@ -1,5 +1,5 @@
 {
-  "name": "site-spec",
+  "name": "site-spec-monorepo",
   "version": "0.3.0",
   "private": true,
   "description": "The invisible foundation your website is missing. Audit any site — SEO, accessibility, privacy, structured data, and AI searchability — then auto-fix what's broken.",
