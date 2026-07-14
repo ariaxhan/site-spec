@@ -51,9 +51,10 @@ describe("audit: the slop fixture fails loudly", () => {
       "audit/inline-handler",
       "audit/dangling-ref",
       "audit/broken-link",
-      "audit/form-untyped",
-      "audit/cookie-undeclared",
-      "audit/tracker-undeclared",
+      // external site (no foundation.json): generic privacy warnings, not
+      // manifest-contract errors, and no form-untyped (a site-spec concept).
+      "audit/cookie-detected",
+      "audit/tracker-detected",
       "audit/sitemap-missing",
       "audit/robots-missing",
       "audit/llms-missing",
@@ -120,6 +121,101 @@ const idsOf = (files: Record<string, string | null>) =>
 
 const findingsFor = (files: Record<string, string | null>, checkId: string) =>
   auditFiles({ files }).findings.filter((f) => f.checkId === checkId);
+
+describe("audit/empty-body", () => {
+  it("fires on a client-rendered SPA shell (scripts, no server text)", () => {
+    const files = {
+      "index.html":
+        `<!doctype html><html lang="en"><head><title>t</title></head>` +
+        `<body><div id="root"></div><script src="app.js"></script></body></html>`,
+    };
+    const hits = findingsFor(files, "audit/empty-body");
+    expect(hits).toHaveLength(1);
+    expect(hits[0]!.severity).toBe("warning");
+    expect(hits[0]!.message).toMatch(/near-empty page/);
+  });
+
+  it("does not fire on a content-rich page that also loads scripts", () => {
+    const body =
+      `<h1>Rosalia's Kitchen</h1><p>${"Wood-fired pizza and fresh pasta served nightly in the heart of town. ".repeat(6)}</p>` +
+      `<script src="analytics.js"></script>`;
+    const files = { "index.html": page("", body) };
+    expect(idsOf(files)).not.toContain("audit/empty-body");
+  });
+
+  it("does not fire on the 404 page even when it is a script shell", () => {
+    const files = {
+      "index.html": page("", `<h1>ok</h1>`),
+      "404.html":
+        `<!doctype html><html lang="en"><head><title>t</title></head>` +
+        `<body><div id="root"></div><script src="app.js"></script></body></html>`,
+    };
+    expect(idsOf(files)).not.toContain("audit/empty-body");
+  });
+});
+
+describe("audit: foundation-contract checks only fire with foundation.json", () => {
+  // an external site: a form, a tracker script, and a document.cookie write, no manifest.
+  const external = () => ({
+    "index.html": page(
+      "",
+      `<h1>x</h1><form class="newsletter"><input name="email"></form>` +
+        `<script async src="https://www.googletagmanager.com/gtag/js?id=G-X"></script>` +
+        `<script>document.cookie = "id=1";</script>`,
+    ),
+  });
+
+  it("external site → generic privacy WARNINGS, no manifest-framed errors", () => {
+    const ids = idsOf(external());
+    expect(ids).toContain("audit/tracker-detected");
+    expect(ids).toContain("audit/cookie-detected");
+    expect(ids).not.toContain("audit/form-untyped");
+    expect(ids).not.toContain("audit/tracker-undeclared");
+    expect(ids).not.toContain("audit/cookie-undeclared");
+    // the generic checks are warnings, never errors
+    const rep = auditFiles({ files: external() });
+    for (const id of ["audit/tracker-detected", "audit/cookie-detected"]) {
+      for (const f of rep.findings.filter((x) => x.checkId === id)) {
+        expect(f.severity).toBe("warning");
+        expect(f.message).not.toMatch(/foundation\.json/);
+      }
+    }
+  });
+
+  it("foundation present → original contract ERRORS, no generic detected warnings", () => {
+    const files = {
+      ...external(),
+      "foundation.json": JSON.stringify({ analytics: { provider: "none" } }),
+    };
+    const ids = auditFiles({ files }).findings.map((f) => f.checkId);
+    expect(ids).toContain("audit/form-untyped");
+    expect(ids).toContain("audit/tracker-undeclared");
+    expect(ids).toContain("audit/cookie-undeclared");
+    expect(ids).not.toContain("audit/tracker-detected");
+    expect(ids).not.toContain("audit/cookie-detected");
+  });
+});
+
+describe("audit: linkChecks option", () => {
+  it("skips sitemap/dangling/broken checks when linkChecks is false", () => {
+    const files = {
+      "index.html": page("", `<h1>x</h1><a href="/missing.html">gone</a><img src="/nope.jpg" alt="x">`),
+      "sitemap.xml": "<urlset><loc>https://e.com/</loc><loc>https://e.com/ghost.html</loc></urlset>",
+    };
+    const skipped = ["audit/sitemap-page-missing", "audit/dangling-ref", "audit/broken-link"];
+    const withLinks = auditFiles({ files }).findings.map((f) => f.checkId);
+    for (const id of skipped) expect(withLinks).toContain(id);
+    const withoutLinks = auditFiles({ files, linkChecks: false }).findings.map((f) => f.checkId);
+    for (const id of skipped) expect(withoutLinks).not.toContain(id);
+  });
+
+  it("still runs every other check with linkChecks false", () => {
+    const files = { "index.html": page("", `<img src="/a.jpg">`) };
+    expect(auditFiles({ files, linkChecks: false }).findings.map((f) => f.checkId)).toContain(
+      "audit/img-alt-missing",
+    );
+  });
+});
 
 describe("audit/robots-stale-token", () => {
   it("fires once per deprecated Anthropic token", () => {

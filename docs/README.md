@@ -1,6 +1,9 @@
 # site-spec docs
 
-Design documentation for site-spec. Read in this order:
+site-spec is primarily a **website-foundation auditor** (`site-spec audit <url>`)
+— see the top-level [README](../README.md) for what it checks and how the live
+crawl works. These documents cover the *other* half: the deterministic compiler
+the auditor grew out of. Read in this order:
 
 1. **[design-philosophy.md](./design-philosophy.md)** — the architectural
    rationale. _Why_ site-spec is a compiler and not a generator, why packs and

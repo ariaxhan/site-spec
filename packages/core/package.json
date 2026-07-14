@@ -1,8 +1,8 @@
 {
   "name": "@site-spec/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "SiteSpec schemas, sections, policies, UI primitives, and the deterministic renderer.",
+  "description": "The site-spec engine: the website-foundation audit checks plus the deterministic compiler (schemas, policies, UI primitives, renderer).",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Aria Han",

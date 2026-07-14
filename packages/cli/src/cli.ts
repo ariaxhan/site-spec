@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
+import { existsSync } from "node:fs";
 import { runBuild } from "./commands/build";
-import { runAudit } from "./commands/audit";
+import { runAudit, runAuditUrl } from "./commands/audit";
 import { runHandoff } from "./commands/handoff";
 import type { AuditFinding, Finding } from "@site-spec/core";
 
@@ -10,11 +11,11 @@ import type { AuditFinding, Finding } from "@site-spec/core";
  * and sets exit codes. Nothing here is worth importing.
  */
 
-const HELP = `site-spec, the anti-slop website foundation compiler (internal)
+const HELP = `site-spec, the website foundation auditor — check any site's AI searchability, SEO, structured data, accessibility, and privacy
 
 Usage:
   site-spec build   <site.config.mjs> --out <dir> [--target cloudflare|netlify|vercel|static]
-  site-spec audit   <dir> [--facts brief.json] [--mode strict|generic] [--json]
+  site-spec audit   <dir|url> [--max N] [--facts brief.json] [--mode strict|generic] [--json]
   site-spec handoff <site.config.mjs> [--out handoff.json]
 
 A site config is pure data: { pack: "<id>", spec, brief, site, foundation?, copy? }.
@@ -84,16 +85,49 @@ async function main(): Promise<number> {
       options: {
         facts: { type: "string" },
         mode: { type: "string" },
+        max: { type: "string" },
         json: { type: "boolean" },
       },
     });
-    const dir = positionals[0];
-    if (!dir) {
-      console.error("usage: site-spec audit <dir> [--facts brief.json] [--mode strict|generic] [--json]");
+    const target = positionals[0];
+    if (!target) {
+      console.error(
+        "usage: site-spec audit <dir|url> [--max N] [--facts brief.json] [--mode strict|generic] [--json]",
+      );
       return 1;
     }
+
+    // URL detection: explicit http(s), or a bare domain that is not a local path.
+    const isUrl =
+      /^https?:\/\//i.test(target) ||
+      (/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(target) && !existsSync(target));
+
+    if (isUrl) {
+      const maxPages = values.max !== undefined ? Number.parseInt(values.max, 10) : undefined;
+      const { report, meta } = await runAuditUrl({
+        url: target,
+        ...(maxPages !== undefined && Number.isFinite(maxPages) ? { maxPages } : {}),
+        ...(values.mode ? { mode: values.mode as "strict" | "generic" } : {}),
+      });
+      if (values.json) {
+        console.log(JSON.stringify({ report, meta }, null, 2));
+        return report.ok ? 0 : 1;
+      }
+      console.log(
+        `audit ${meta.origin} (live), pages crawled: ${report.pages.length}, ` +
+          `errors: ${report.errors}, warnings: ${report.warnings}`,
+      );
+      printAuditFindings(report.findings);
+      if (meta.errors.length) {
+        console.log(`\nnotes:`);
+        for (const note of meta.errors) console.log(`  - ${note}`);
+      }
+      console.log(report.ok ? `\n✓ PASS, no errors` : `\n✗ FAIL, ${report.errors} error(s)`);
+      return report.ok ? 0 : 1;
+    }
+
     const report = runAudit({
-      dir,
+      dir: target,
       ...(values.facts ? { factsPath: values.facts } : {}),
       ...(values.mode ? { mode: values.mode as "strict" | "generic" } : {}),
     });
@@ -102,7 +136,7 @@ async function main(): Promise<number> {
       return report.ok ? 0 : 1;
     }
     console.log(
-      `audit ${dir}, mode: ${report.mode}, pages: ${report.pages.length}, ` +
+      `audit ${target}, mode: ${report.mode}, pages: ${report.pages.length}, ` +
         `errors: ${report.errors}, warnings: ${report.warnings}`,
     );
     printAuditFindings(report.findings);

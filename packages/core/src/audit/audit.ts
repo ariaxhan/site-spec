@@ -27,6 +27,10 @@ export interface AuditInput {
   mode?: "strict" | "generic";
   /** Brief for claims parity (JSON-LD facts must trace to it) */
   facts?: unknown;
+  /** File-presence-dependent checks (dangling refs, broken links, sitemap↔page parity).
+   *  Default true. Set false for a LIVE crawl, where a partial file map cannot prove a
+   *  resource is absent from the server. */
+  linkChecks?: boolean;
 }
 
 export interface AuditFinding {
@@ -151,6 +155,7 @@ export function auditFiles(input: AuditInput): AuditReport {
 
   const findings: AuditFinding[] = [];
   const add = (f: AuditFinding) => findings.push(f);
+  const linkChecks = input.linkChecks ?? true;
 
   // ---- foundation manifest ----------------------------------------------
   let fnd: Foundation = foundation.parse({});
@@ -168,7 +173,8 @@ export function auditFiles(input: AuditInput): AuditReport {
       });
     }
   }
-  const mode: "strict" | "generic" = input.mode ?? (rawFnd != null ? "strict" : "generic");
+  const hasFoundation = rawFnd != null;
+  const mode: "strict" | "generic" = input.mode ?? (hasFoundation ? "strict" : "generic");
   const presence = (severityInGeneric: "error" | "warning") =>
     mode === "strict" ? ("error" as const) : severityInGeneric;
 
@@ -307,6 +313,7 @@ export function auditFiles(input: AuditInput): AuditReport {
       basePath = locs[0]!.replace(/\/+$/, "");
     }
     for (const loc of locs) {
+      if (!linkChecks) break;
       const path = basePath && loc.startsWith(basePath) ? loc.slice(basePath.length) || "/" : loc;
       const resolved = resolveRef(path, "index.html");
       if (!exists(files, resolved)) {
@@ -348,6 +355,26 @@ export function auditFiles(input: AuditInput): AuditReport {
       message: string,
       fix?: string,
     ) => add({ checkId, severity, file: page, message, ...(fix ? { fix } : {}) });
+
+    // no server-rendered content: a client-rendered SPA shell (scripts, no text)
+    // reads as a blank page to AI crawlers and no-JS clients.
+    if (!is404) {
+      const visible = html
+        .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+        .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+        .replace(/<head\b[\s\S]*?<\/head>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (visible.length < 200 && /<script\b/i.test(html)) {
+        pageErr(
+          "audit/empty-body",
+          "warning",
+          `Page ships almost no server-rendered text (${visible.length} chars) but loads scripts: AI crawlers and no-JS clients see a near-empty page.`,
+          "Server-render or pre-render the main content so it is in the initial HTML.",
+        );
+      }
+    }
 
     // head basics
     if (!/<title[^>]*>[^<]/i.test(html)) {
@@ -476,7 +503,7 @@ export function auditFiles(input: AuditInput): AuditReport {
       .filter(([p, v]) => p.endsWith(".css") && typeof v === "string")
       .map(([, v]) => v as string)
       .join("\n");
-    for (const { ref, kind } of collectRefs(html, cssFiles)) {
+    for (const { ref, kind } of linkChecks ? collectRefs(html, cssFiles) : []) {
       if (!isInternalRef(ref)) continue;
       const rebased = rebase(ref);
       if (rebased === null) continue; // points outside this subpath deploy
@@ -490,8 +517,9 @@ export function auditFiles(input: AuditInput): AuditReport {
       }
     }
 
-    // forms vs contracts
-    for (const m of noScript.matchAll(/<form\b[^>]*>/gi)) {
+    // forms vs contracts (a site-spec authoring concept: only meaningful when a
+    // foundation.json manifest was shipped, skip entirely on external sites)
+    for (const m of hasFoundation ? noScript.matchAll(/<form\b[^>]*>/gi) : []) {
       const tag = m[0];
       const id = tag.match(/\sid="([^"]+)"/i)?.[1];
       const contract = id ? fnd.forms.find((f) => f.id === id) : undefined;
@@ -518,25 +546,49 @@ export function auditFiles(input: AuditInput): AuditReport {
       .join("\n");
   const htmlCorpus = pages.map((p) => files[p] ?? "").join("\n");
 
-  if (/document\.cookie\s*=/.test(scriptCorpus) && fnd.cookies.length === 0) {
-    add({
-      checkId: "audit/cookie-undeclared",
-      severity: "error",
-      message: "Scripts write document.cookie but foundation.json declares zero cookies.",
-      fix: "Declare every cookie (name, purpose, ttl), undeclared cookies are a consent liability.",
-    });
-  }
-
-  const declaredProvider = fnd.analytics.provider;
-  for (const t of TRACKER_SIGNATURES) {
-    if (t.id === declaredProvider) continue;
-    if (t.pattern.test(htmlCorpus) || t.pattern.test(scriptCorpus)) {
+  const writesCookies = /document\.cookie\s*=/.test(scriptCorpus);
+  if (hasFoundation) {
+    // foundation-contract checks: emitted trackers/cookies must trace to the manifest.
+    if (writesCookies && fnd.cookies.length === 0) {
       add({
-        checkId: "audit/tracker-undeclared",
+        checkId: "audit/cookie-undeclared",
         severity: "error",
-        message: `Detected ${t.id} but foundation.json declares analytics: ${declaredProvider}.`,
-        fix: "Declare the provider in foundation.json (and its consent story), or remove the tracker.",
+        message: "Scripts write document.cookie but foundation.json declares zero cookies.",
+        fix: "Declare every cookie (name, purpose, ttl), undeclared cookies are a consent liability.",
       });
+    }
+    const declaredProvider = fnd.analytics.provider;
+    for (const t of TRACKER_SIGNATURES) {
+      if (t.id === declaredProvider) continue;
+      if (t.pattern.test(htmlCorpus) || t.pattern.test(scriptCorpus)) {
+        add({
+          checkId: "audit/tracker-undeclared",
+          severity: "error",
+          message: `Detected ${t.id} but foundation.json declares analytics: ${declaredProvider}.`,
+          fix: "Declare the provider in foundation.json (and its consent story), or remove the tracker.",
+        });
+      }
+    }
+  } else {
+    // external site (no manifest): generic privacy warnings, no foundation.json framing.
+    if (writesCookies) {
+      add({
+        checkId: "audit/cookie-detected",
+        severity: "warning",
+        message:
+          "Scripts set cookies via document.cookie: ensure they are disclosed and consent-gated where required.",
+        fix: "Document each cookie's purpose and TTL; gate non-essential cookies behind consent.",
+      });
+    }
+    for (const t of TRACKER_SIGNATURES) {
+      if (t.pattern.test(htmlCorpus) || t.pattern.test(scriptCorpus)) {
+        add({
+          checkId: "audit/tracker-detected",
+          severity: "warning",
+          message: `Detected the ${t.id} tracker: ensure you have a consent/disclosure story (GDPR/CCPA).`,
+          fix: "Disclose it in your privacy policy and gate non-essential trackers behind consent.",
+        });
+      }
     }
   }
 

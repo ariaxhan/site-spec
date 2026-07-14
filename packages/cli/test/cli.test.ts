@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { runBuild } from "../src/commands/build";
 import { runAudit } from "../src/commands/audit";
 import { runHandoff } from "../src/commands/handoff";
+import { pathToKey, synthesizeHeaders } from "../src/fetch-site";
 
 /**
  * The CLI's command functions are importable library code (package-first);
@@ -52,6 +53,35 @@ describe("site-spec audit (library entry)", () => {
     expect(report.ok).toBe(false);
     expect(report.errors).toBeGreaterThanOrEqual(10);
     expect(new Set(report.findings.map((f) => f.checkId)).size).toBeGreaterThanOrEqual(15);
+  });
+});
+
+describe("fetch-site pure helpers (offline)", () => {
+  it("pathToKey maps URL paths to page keys deterministically", () => {
+    expect(pathToKey("/")).toBe("index.html");
+    expect(pathToKey("")).toBe("index.html");
+    expect(pathToKey("/about.html")).toBe("about.html");
+    expect(pathToKey("/blog/post.html")).toBe("blog/post.html");
+    expect(pathToKey("/foo/bar")).toBe("foo/bar/index.html");
+    expect(pathToKey("/foo/bar/")).toBe("foo/bar/index.html");
+    expect(pathToKey("/a.pdf")).toBe("a.pdf");
+    expect(pathToKey("/files/report.json")).toBe("files/report.json");
+    expect(pathToKey("/about?ref=x#top")).toBe("about/index.html");
+  });
+
+  it("synthesizeHeaders emits a Cloudflare/Netlify _headers body preserving names", () => {
+    const body = synthesizeHeaders({
+      "Strict-Transport-Security": "max-age=31536000",
+      "X-Content-Type-Options": "nosniff",
+    });
+    expect(body).toBe(
+      "/*\n  Strict-Transport-Security: max-age=31536000\n  X-Content-Type-Options: nosniff\n",
+    );
+    expect(body.startsWith("/*\n")).toBe(true);
+  });
+
+  it("synthesizeHeaders on an empty header set is just the wildcard block", () => {
+    expect(synthesizeHeaders({})).toBe("/*\n");
   });
 });
 

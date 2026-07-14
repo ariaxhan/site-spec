@@ -1,8 +1,8 @@
 {
   "name": "site-spec",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "A deterministic compiler for AI-generated websites. The SiteSpec is the artifact; HTML is one compiled output.",
+  "description": "Audit any website's invisible foundations — AI searchability, SEO, structured data, accessibility, and privacy. Also a deterministic site compiler.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Aria Han",
@@ -15,16 +15,16 @@
     "url": "https://github.com/ariaxhan/site-spec/issues"
   },
   "keywords": [
+    "website-audit",
+    "seo-audit",
+    "ai-searchability",
+    "llms-txt",
+    "structured-data",
+    "accessibility",
+    "robots-txt",
     "website-compiler",
     "sitespec",
-    "static-site-generator",
-    "deterministic",
-    "ai",
-    "llm",
-    "anti-slop",
-    "seo",
-    "accessibility",
-    "structured-data"
+    "deterministic"
   ],
   "engines": {
     "node": ">=20"
