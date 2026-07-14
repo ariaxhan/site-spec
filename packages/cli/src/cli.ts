@@ -23,19 +23,26 @@ function detectUrl(target: string): boolean {
  * and sets exit codes. Nothing here is worth importing.
  */
 
-const HELP = `site-spec, the website foundation auditor — check any site's AI searchability, SEO, structured data, accessibility, and privacy
+const HELP = `site-spec — audit any website's invisible foundation, then fix what's broken.
+Checks SEO, accessibility, privacy, structured data, performance, and AI
+searchability (whether Google, ChatGPT, Claude, and Perplexity can read you).
 
 Usage:
+  site-spec audit <dir|url> [--max N] [--report file.md] [--json]
+      Report every foundation problem, with a concrete fix for each.
+  site-spec fix   <dir|url> [--out dir] [--write] [--max N] [--json]
+      Auto-repair the mechanical issues, scaffold the fact-dependent ones,
+      and flag what needs a human. Writes to ./site-spec-fix by default;
+      --write edits a local dir in place (refused for a URL).
+
+Common options:
+  --max N        page cap for a live crawl (default 25; truncation is reported)
+  --report FILE  also write the audit as a Markdown document
+  --json         emit the full structured report
+
+Legacy (the deterministic compiler this grew out of):
   site-spec build   <site.config.mjs> --out <dir> [--target cloudflare|netlify|vercel|static]
-  site-spec audit   <dir|url> [--max N] [--facts brief.json] [--mode strict|generic] [--report file.md] [--json]
-  site-spec fix     <dir|url> [--out dir] [--write] [--max N] [--json]
   site-spec handoff <site.config.mjs> [--out handoff.json]
-
-fix repairs the mechanical audit findings (into ./site-spec-fix by default,
-or in place with --write for a local dir) and flags what needs a human.
-
-A site config is pure data: { pack: "<id>", spec, brief, site, foundation?, copy? }.
-Demo configs live in sites/.
 `;
 
 function printPolicyFindings(findings: Finding[]): void {
