@@ -2,6 +2,8 @@
 
 > **The invisible foundation your website is missing. Audit any site — then fix what's broken.**
 
+[![npm](https://img.shields.io/npm/v/site-spec.svg)](https://www.npmjs.com/package/site-spec)
+[![npm downloads](https://img.shields.io/npm/dm/site-spec.svg)](https://www.npmjs.com/package/site-spec)
 [![CI](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
