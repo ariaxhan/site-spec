@@ -33,6 +33,24 @@ flags precisely what needs a human.
 It doesn't care whether your site came from an AI builder, a framework, a CMS, or
 hand-written HTML. It only cares whether the foundation is correct.
 
+## Try it without installing anything
+
+**[site-spec.ariaxhan.workers.dev](https://site-spec.ariaxhan.workers.dev)** — paste a
+URL, get the report. No account, no signup.
+
+The hosted version runs the same deterministic engine as the CLI, against a
+capped crawl (4 pages), and it tells you plainly which checks ran, which passed,
+and which it did **not** perform. Add `?format=json` for machine-readable output:
+
+```bash
+curl "https://site-spec.ariaxhan.workers.dev/audit?format=json&url=example.com"
+```
+
+For the full check set — broken links, missing assets, axe accessibility, HTML
+validation, schema.org validation — and for the `fix` command, use the CLI below.
+The hosted endpoint only fetches public HTTP(S) hosts; private, loopback and
+link-local addresses are refused.
+
 ## How to use
 
 Requires Node 20+. No account, no API key, no SaaS.
@@ -165,6 +183,7 @@ npm run verify    # html-validate + JSON-LD + axe over the demo output
 | ------------------- | ------------------------------------------------------------------- |
 | [`site-spec`](https://www.npmjs.com/package/site-spec) (npm) | The published CLI — `audit` · `fix` · `build`. Self-contained; this is what `npx site-spec` runs. |
 | `@site-spec/core`   | The pure engine (audit checks, fixers, policy definitions, legacy compiler). Bundled into the CLI; not separately published yet. |
+| `@site-spec/worker` | The hosted auditor at [site-spec.ariaxhan.workers.dev](https://site-spec.ariaxhan.workers.dev) — a Cloudflare Worker wrapping the same engine. Adds the URL-admission guard, a capped crawler, and rate limiting. Deploy with `npm run deploy -w @site-spec/worker`. |
 
 ## Contributing
 

@@ -1,0 +1,20 @@
+{
+  "name": "@site-spec/worker",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Hosted site-spec auditor: paste a URL, run the deterministic audit engine against a live site.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Aria Han",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "wrangler deploy --dry-run",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@site-spec/core": "*",
+    "wrangler": "^4.36.0"
+  }
+}

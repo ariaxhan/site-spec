@@ -1,0 +1,33 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "site-spec",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-15",
+
+  // Free-tier only, on purpose. This Worker declares NO bindings: no KV, no D1,
+  // no R2, no Durable Objects, no Queues, no Workers AI, no containers, and no
+  // custom domain or route. It runs on workers.dev and provisions nothing
+  // billable. Rate limiting is done in isolate memory (see src/index.ts) rather
+  // than with a binding so that this stays true and checkable by reading this
+  // file. Free-plan ceilings the code is written against: 10ms CPU per request,
+  // 50 subrequests per request, 100k requests/day.
+  "workers_dev": true,
+
+  // The one binding. Rate limiting is part of the Workers runtime rather than a
+  // provisioned resource: it stores no data, has no dashboard object, and has
+  // no billing dimension, so it does not change the free-tier position above.
+  // It replaced an in-isolate counter that measured as pure theater: 12 rapid
+  // requests all returned 200 because each landed on a different isolate.
+  "ratelimits": [
+    {
+      "name": "AUDIT_LIMITER",
+      "namespace_id": "8471",
+      "simple": { "limit": 8, "period": 60 }
+    }
+  ],
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

@@ -12,7 +12,9 @@
     "directory": "packages/core"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./audit": "./src/audit/audit.ts",
+    "./audit/report-md": "./src/audit/report-md.ts"
   },
   "scripts": {
     "typecheck": "tsc -b"
