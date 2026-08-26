@@ -16,6 +16,8 @@ call `list_checks` to learn the check ids and `audit_site` on a URL.
 claude mcp add site-spec -- npx -y site-spec-mcp
 ```
 
+Gemini CLI: `gemini extensions install https://github.com/ariaxhan/site-spec`.
+
 Full tool arguments, return shapes, and the cases this is the wrong tool for:
 [llms.txt](./llms.txt).
 
