@@ -123,6 +123,8 @@ args = ["-y", "site-spec-mcp"]
 
 </details>
 
+Or in Docker: `docker run -i --rm -v $PWD:/data mcp/site-spec` (mount the directory you want to audit or write to).
+
 Four tools:
 
 | Tool | What it does |
