@@ -90,6 +90,54 @@ wrote 4 file(s) to ./fixed
 Drop `audit` into CI with a non-zero exit on errors to gate deploys. Both commands
 work on a build/output directory too — just pass a path instead of a URL.
 
+## Use it from your coding agent (MCP)
+
+The same engine, as an [MCP](https://modelcontextprotocol.io) server — so the
+agent that generated the site can also check and repair its invisible layer,
+without you copying reports between windows.
+
+```bash
+claude mcp add site-spec -- npx -y site-spec-mcp
+```
+
+<details>
+<summary>Codex (<code>~/.codex/config.toml</code>)</summary>
+
+```toml
+[mcp_servers.site-spec]
+command = "npx"
+args = ["-y", "site-spec-mcp"]
+```
+
+</details>
+
+Four tools:
+
+| Tool | What it does |
+| --- | --- |
+| `audit_site` | Crawl a live URL (or read a local build directory) and return every finding: check id, severity, file, and whether it can be auto-fixed. |
+| `fix_issue` | Apply the deterministic repair for one check id and return the diff — or write it, for a local directory. |
+| `compile_spec` | Turn verified business facts into a validated SiteSpec and the deployable files it renders to. |
+| `list_checks` | Enumerate every check the engine can raise, with a one-line description and its fix availability. |
+
+The server calls the engine in-process. It never shells out to the CLI and never
+hops to the hosted worker — all three are siblings over one library.
+
+```mermaid
+flowchart LR
+  A["MCP client<br/>(Claude Code, Codex)"] -- stdio JSON-RPC --> B["site-spec-mcp"]
+  B --> C["@site-spec/core/io<br/>fetchSite · readSiteDir"]
+  C -- "file map" --> D["@site-spec/core<br/>auditFiles · fixFiles · buildSite"]
+  D -- "findings / files" --> B
+  B -- "JSON" --> A
+```
+
+Two honest limits, spelled out in full in the
+[package README](./packages/mcp/README.md): `fix_issue` on a **URL** can only
+ever hand back a diff (a remote server is not writable), and a **live crawl**
+runs with presence checks off, because a capped crawl cannot prove a file is
+absent from a server.
+
 ---
 
 <details>
@@ -182,8 +230,9 @@ npm run verify    # html-validate + JSON-LD + axe over the demo output
 | Package             | Responsibility                                                       |
 | ------------------- | ------------------------------------------------------------------- |
 | [`site-spec`](https://www.npmjs.com/package/site-spec) (npm) | The published CLI — `audit` · `fix` · `build`. Self-contained; this is what `npx site-spec` runs. |
-| `@site-spec/core`   | The pure engine (audit checks, fixers, policy definitions, legacy compiler). Bundled into the CLI; not separately published yet. |
+| `@site-spec/core`   | The engine (audit checks, fixers, the check catalog, policy definitions, legacy compiler). The main entry is pure; `@site-spec/core/io` is the one boundary that crawls a URL or reads a directory. Bundled into the CLI and the MCP server; not separately published yet. |
 | `@site-spec/worker` | The hosted auditor at [site-spec.ariaxhan.workers.dev](https://site-spec.ariaxhan.workers.dev) — a Cloudflare Worker wrapping the same engine. Adds the URL-admission guard, a capped crawler, and rate limiting. Deploy with `npm run deploy -w @site-spec/worker`. |
+| [`site-spec-mcp`](https://www.npmjs.com/package/site-spec-mcp) (npm) | The MCP server — `audit_site` · `fix_issue` · `compile_spec` · `list_checks` over stdio. Self-contained; this is what `npx site-spec-mcp` runs. |
 
 ## Contributing
 
