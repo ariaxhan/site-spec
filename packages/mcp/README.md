@@ -6,6 +6,17 @@
 [![npm](https://img.shields.io/npm/v/site-spec-mcp.svg)](https://www.npmjs.com/package/site-spec-mcp)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
+## For agents
+
+Register the server, then call `list_checks` to learn the check ids and `audit_site` on a URL.
+
+```bash
+claude mcp add site-spec -- npx -y site-spec-mcp
+```
+
+Full tool arguments, return shapes, and the cases this is the wrong tool for:
+[llms.txt](./llms.txt).
+
 AI can generate a beautiful website in seconds. The part it *can't* see is the
 machine-readable foundation underneath the pixels — `robots.txt`, structured
 data, `llms.txt`, canonical and `noindex` signals, response headers,

@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] — 2026-08-26
+
+Agent discovery. No behaviour change to the audit engine, the CLI, or any tool result.
+
+**0.3.1 was never published to npm** — the `mcpName` marker it added ships here instead.
+
+### Added
+
+- `llms.txt` at the repo root and inside the published `site-spec-mcp` tarball
+  ([llmstxt.org](https://llmstxt.org) format): what the server is, how to register it,
+  every tool with its exact argument names and return shape, a minimal call sequence,
+  and the cases where it is the wrong tool.
+- A `## For agents` section at the top of both READMEs, with a block an agent can run
+  verbatim and a pointer to `llms.txt`.
+
+### Changed
+
+- MCP tool descriptions lead with an imperative verb and state arguments and return
+  shape in the first sentence, so a client's tool list is scannable without a doc lookup.
+- `packages/mcp/package.json` keywords aimed at how agents and their users search npm
+  (`mcp-server`, `claude-code`, `codex`, `cursor`, `ai-agents`, `accessibility-audit`).
+- `server.json` description rewritten for registry search, within the 100-char cap.
+
 ## [0.3.1] — 2026-08-26
 
 Registry plumbing only. No behaviour change to the MCP server or the CLI.

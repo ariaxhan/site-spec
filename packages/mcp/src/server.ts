@@ -30,7 +30,7 @@ export function createServer(): McpServer {
     {
       title: "Audit a website's invisible foundation",
       description:
-        "Crawl a live URL (or read a local directory of built output) and report every problem in the layer a browser does not show: robots.txt and llms.txt policy, canonical and noindex signals, structured data, Open Graph, security and cache headers, accessibility semantics, and the tracker/cookie surface. Each finding carries its check id, severity, the file it was found in, and whether fix_issue can repair it automatically.",
+        "Audit a website: takes url (a live URL, a bare hostname, or a local directory of built output), optional checks (check ids to filter to) and optional maxPages (1-200, default 25), and returns { ok, target, mode, live, errors, warnings, pages, findings } where every finding carries checkId, severity, file, category and fixAvailable. Covers the layer a browser does not show: robots.txt and llms.txt policy, canonical and noindex signals, structured data, Open Graph, security and cache headers, accessibility semantics, and the tracker/cookie surface.",
       inputSchema: {
         url: z
           .string()
@@ -68,7 +68,7 @@ export function createServer(): McpServer {
     {
       title: "Auto-fix one audit finding",
       description:
-        "Apply site-spec's deterministic repair for ONE check id and return the resulting diff. The engine is pure: it produces corrected file contents and never writes by itself, so a URL target can only ever yield a diff (a remote server is not writable). To write the fix, point this at a local directory and pass write: true. Not every check is repairable — list_checks marks which ones are, and unrepairable findings come back with the manual step spelled out.",
+        "Fix one audit finding: takes url_or_path, a single check_id, optional write (default false), optional out_dir and optional maxPages, and returns { checkId, fixAvailable, matchedFindings, actions, diffs, written }. Defaults to a dry run that writes nothing; write: true requires a local directory target and is refused for a URL, because a remote server is not writable. Not every check is repairable: list_checks marks which ones are, and unrepairable findings come back with the manual step spelled out.",
       inputSchema: {
         url_or_path: z
           .string()
@@ -112,7 +112,7 @@ export function createServer(): McpServer {
     {
       title: "Compile business data into a SiteSpec and a deployable site",
       description:
-        "Turn verified business facts into a validated SiteSpec and the files it renders to: HTML, sitemap.xml, robots.txt, llms.txt, headers and icons. `business` is site-spec's pure-data site config: { pack, brief, site, spec }, where `pack` is a registered pack id, `brief` is the real business facts (name, category, phone, address, hours, reviews), `site` is deploy context (baseUrl, locales), and `spec` is the page structure. Validation runs at both the spec tier and the rendered tier, so an invalid site never produces output. Returns the files in memory unless out_dir is given.",
+        "Compile business data into a deployable site: takes business (the pure-data site config { pack, brief, site, spec }, plus optional foundation and target) and optional out_dir, and returns { ok, pack, spec, files, findings }, with written and writtenTo when out_dir is given. `pack` is a registered pack id, `brief` is the verified business facts (name, category, phone, address, hours, reviews), `site` is deploy context (baseUrl, locales), and `spec` is the page structure; the files rendered are HTML, sitemap.xml, robots.txt, llms.txt, headers and icons. Validation runs at both the spec tier and the rendered tier, so an invalid site never produces output.",
       inputSchema: {
         business: z
           .record(z.unknown())
@@ -140,7 +140,7 @@ export function createServer(): McpServer {
     {
       title: "List every audit check",
       description:
-        "Enumerate every check the site-spec audit engine can raise: the check id, a one-line description of what it looks for, its category (seo, privacy, security, accessibility, performance, structured-data, ai-searchability, structure), and whether fix_issue can repair it automatically. Read this before filtering audit_site or calling fix_issue.",
+        "List every audit check: takes no arguments and returns { count, fixable, checks } where each check has id, description, category (seo, privacy, security, accessibility, performance, structured-data, ai-searchability, structure) and fixable. Call this before filtering audit_site or calling fix_issue.",
       inputSchema: {},
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
