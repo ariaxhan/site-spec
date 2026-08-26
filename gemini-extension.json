@@ -1,0 +1,12 @@
+{
+  "name": "site-spec",
+  "version": "0.3.2",
+  "description": "Audit any website or built HTML for SEO, accessibility, structured data, llms.txt and AI-searchability, then apply deterministic repairs. 40 checks, 17 auto-fixable.",
+  "contextFileName": "llms.txt",
+  "mcpServers": {
+    "site-spec": {
+      "command": "npx",
+      "args": ["-y", "site-spec-mcp"]
+    }
+  }
+}
