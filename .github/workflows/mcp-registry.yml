@@ -1,0 +1,49 @@
+# Publishes site-spec-mcp to the official MCP Registry.
+#
+# Order matters: the registry verifies npm ownership by reading "mcpName" from the
+# PUBLISHED package.json on npm. So `npm publish` must happen FIRST (Aria runs it by
+# hand, npm 2FA needs a browser OTP), and only then is the mcp-v* tag pushed.
+#
+#   npm publish site-spec-mcp-0.3.1.tgz --access public
+#   git tag mcp-v0.3.1 && git push origin mcp-v0.3.1
+name: Publish to MCP Registry
+
+on:
+  push:
+    tags: ["mcp-v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # OIDC token for `mcp-publisher login github-oidc`
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Check tag matches server.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/mcp-v}"
+          JSON_VERSION="$(jq -r .version server.json)"
+          if [ "$TAG_VERSION" != "$JSON_VERSION" ]; then
+            echo "Tag mcp-v$TAG_VERSION does not match server.json version $JSON_VERSION" >&2
+            exit 1
+          fi
+
+      - name: Check the version is actually on npm
+        run: npm view "site-spec-mcp@$(jq -r .version server.json)" version
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Validate server.json
+        run: ./mcp-publisher validate
+
+      - name: Authenticate to MCP Registry
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server to MCP Registry
+        run: ./mcp-publisher publish

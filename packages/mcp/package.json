@@ -1,6 +1,7 @@
 {
   "name": "site-spec-mcp",
-  "version": "0.3.0",
+  "mcpName": "io.github.ariaxhan/site-spec",
+  "version": "0.3.1",
   "description": "MCP server for site-spec: audit any website's invisible foundation (SEO, accessibility, privacy, structured data, AI searchability) and auto-fix what's broken, from inside your agent.",
   "type": "module",
   "license": "Apache-2.0",
