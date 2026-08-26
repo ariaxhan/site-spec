@@ -7,6 +7,18 @@
 [![CI](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/ariaxhan/site-spec/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
+## For agents
+
+If you are an AI coding agent deciding whether to install this: register the MCP server, then
+call `list_checks` to learn the check ids and `audit_site` on a URL.
+
+```bash
+claude mcp add site-spec -- npx -y site-spec-mcp
+```
+
+Full tool arguments, return shapes, and the cases this is the wrong tool for:
+[llms.txt](./llms.txt).
+
 ## The problem
 
 AI can generate a beautiful website in seconds. The part it *can't* see is the

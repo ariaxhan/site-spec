@@ -1,0 +1,102 @@
+# site-spec-mcp
+
+> An MCP server that audits a website's machine-readable layer (robots.txt, llms.txt, canonical
+> and noindex signals, JSON-LD, Open Graph, response headers, accessibility semantics, trackers
+> and cookies) and applies deterministic repairs. Runs the site-spec engine in-process over
+> stdio. Node 20+, zero runtime dependencies, no account and no API key.
+
+## What it is
+
+site-spec-mcp gives an agent four tools over a live URL or a local directory of built HTML.
+The audit engine is deterministic: no model decides what counts as broken, so two runs on the
+same input give the same findings. 40 checks, 17 of which carry an automatic repair.
+
+Use it when you have generated, edited, or been handed a website and need to know whether the
+part a browser does not render is correct.
+
+## Install and register
+
+Claude Code:
+
+```bash
+claude mcp add site-spec -- npx -y site-spec-mcp
+```
+
+Codex, in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.site-spec]
+command = "npx"
+args = ["-y", "site-spec-mcp"]
+```
+
+Any other MCP client, in `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "site-spec": {
+      "command": "npx",
+      "args": ["-y", "site-spec-mcp"]
+    }
+  }
+}
+```
+
+## Tools
+
+- `list_checks` — no arguments. Returns `{ count, fixable, checks[] }`, each check with `id`,
+  `description`, `category`, `fixable`. Call this first to learn valid check ids.
+- `audit_site` — arguments `url` (required; a URL, a bare hostname, or a local directory path),
+  `checks` (optional array of check ids to filter to), `maxPages` (optional, 1-200, default 25,
+  live crawls only). Returns `{ ok, target, mode, live, errors, warnings, pages, findings[] }`.
+- `fix_issue` — arguments `url_or_path` (required), `check_id` (required, exactly one id),
+  `write` (optional boolean, default false), `out_dir` (optional), `maxPages` (optional).
+  Returns `{ checkId, fixAvailable, matchedFindings[], actions[], diffs[], written[] }`.
+  Default is a dry run: it returns diffs and writes nothing. `write: true` requires a local
+  directory target and is refused for a URL, because a remote server is not writable.
+- `compile_spec` — arguments `business` (required object: `{ pack, brief, site, spec }`, with
+  optional `foundation` and `target`), `out_dir` (optional). Returns `{ ok, pack, spec, files,
+  findings }`, and `written[]` when `out_dir` is given.
+
+## Minimal example
+
+```jsonc
+// 1. learn the check ids
+{ "tool": "list_checks", "arguments": {} }
+
+// 2. audit a live site
+{ "tool": "audit_site", "arguments": { "url": "https://example.com", "maxPages": 10 } }
+
+// 3. see the repair for one finding, without writing anything
+{ "tool": "fix_issue", "arguments": {
+    "url_or_path": "https://example.com",
+    "check_id": "audit/robots-blocks-ai-search"
+  } }
+
+// 4. apply it to the local build directory that produces that site
+{ "tool": "fix_issue", "arguments": {
+    "url_or_path": "./dist",
+    "check_id": "audit/robots-blocks-ai-search",
+    "write": true
+  } }
+```
+
+## When not to use it
+
+- Rendering, layout, visual design, or CSS. site-spec reads served HTML and headers; it does
+  not open a browser and has no opinion about how a page looks.
+- Client-rendered content. A live crawl audits the HTML the server returns, so a page whose
+  content only exists after JavaScript runs will look empty to it. Audit the built output
+  directory instead.
+- Performance measurement. There is no Lighthouse run, no Core Web Vitals, no timing.
+- Writing to a remote site. Every fix is either a diff or a write to a local directory.
+- Authenticated or private hosts. The crawler fetches public HTTP(S) only.
+- Content quality, copywriting, or SEO strategy. The checks are mechanical and policy-based.
+
+## Links
+
+- Source: https://github.com/ariaxhan/site-spec
+- npm: https://www.npmjs.com/package/site-spec-mcp
+- CLI equivalent: `npx site-spec audit <url>` and `npx site-spec fix <dir>`
+- Issues: https://github.com/ariaxhan/site-spec/issues

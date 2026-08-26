@@ -1,7 +1,7 @@
 {
   "name": "site-spec-mcp",
   "mcpName": "io.github.ariaxhan/site-spec",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "MCP server for site-spec: audit any website's invisible foundation (SEO, accessibility, privacy, structured data, AI searchability) and auto-fix what's broken, from inside your agent.",
   "type": "module",
   "license": "Apache-2.0",
@@ -34,17 +34,21 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "model-context-protocol",
-    "website-audit",
+    "claude-code",
+    "codex",
+    "cursor",
     "seo-audit",
+    "accessibility-audit",
     "ai-searchability",
     "llms-txt",
-    "structured-data",
-    "accessibility",
-    "site-spec"
+    "website-audit",
+    "ai-agents"
   ],
   "files": [
-    "dist"
+    "dist",
+    "llms.txt"
   ],
   "publishConfig": {
     "access": "public"
