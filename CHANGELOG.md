@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] — 2026-08-26
+
+Registry plumbing only. No behaviour change to the MCP server or the CLI.
+
+### Added
+
+- `"mcpName": "io.github.ariaxhan/site-spec"` in `packages/mcp/package.json`. The
+  official MCP Registry verifies npm ownership by reading this field from the
+  **published** package, so it has to ship inside a release.
+- `server.json` at the repo root (schema `2025-12-11`), describing `site-spec-mcp`
+  as an npm stdio server with no required arguments.
+- `.github/workflows/mcp-registry.yml` — publishes to the registry on an `mcp-v*`
+  tag via GitHub OIDC, after checking the tag matches `server.json` and that the
+  version is already live on npm.
+
 ## [0.3.0] — 2026-07-14
 
 The auditor becomes an auditor **and fixer**, and the project sharpens to a single
