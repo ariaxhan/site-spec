@@ -1,0 +1,11 @@
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+docs
+examples
+sites
+apps
+coverage
