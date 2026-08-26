@@ -2,7 +2,7 @@
   "name": "@site-spec/core",
   "version": "0.3.0",
   "private": true,
-  "description": "The site-spec engine (pure): website-foundation audit checks, the fixers, the Markdown report renderer, and the legacy deterministic compiler.",
+  "description": "The site-spec engine: website-foundation audit checks, the fixers, the check catalog, the Markdown report renderer, and the legacy deterministic compiler. The main entry is pure (no I/O); ./io is the one boundary that touches the network and the filesystem.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Aria Han",
@@ -14,7 +14,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./audit": "./src/audit/audit.ts",
-    "./audit/report-md": "./src/audit/report-md.ts"
+    "./audit/report-md": "./src/audit/report-md.ts",
+    "./io": "./src/io/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -b"

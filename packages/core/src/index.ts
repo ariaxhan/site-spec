@@ -53,6 +53,8 @@ export { packRegistry, getPack } from "./packs/registry";
 // Audit (inspect any static output dir: file map in, findings out)
 export { auditFiles } from "./audit/audit";
 export type { AuditInput, AuditFinding, AuditReport } from "./audit/audit";
+export { CHECK_CATALOG, CHECK_IDS, getCheck } from "./audit/checks";
+export type { CheckDescriptor, CheckCategory } from "./audit/checks";
 export { renderAuditMarkdown } from "./audit/report-md";
 export type { AuditMarkdownOptions } from "./audit/report-md";
 

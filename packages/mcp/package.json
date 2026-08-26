@@ -1,0 +1,51 @@
+{
+  "name": "site-spec-mcp",
+  "version": "0.3.0",
+  "description": "MCP server for site-spec: audit any website's invisible foundation (SEO, accessibility, privacy, structured data, AI searchability) and auto-fix what's broken, from inside your agent.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Aria Han",
+  "homepage": "https://github.com/ariaxhan/site-spec#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ariaxhan/site-spec.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/ariaxhan/site-spec/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "site-spec-mcp": "./dist/mcp.mjs"
+  },
+  "scripts": {
+    "build": "esbuild src/bin.ts --bundle --platform=node --format=esm --banner:js='#!/usr/bin/env node' --outfile=dist/mcp.mjs && chmod +x dist/mcp.mjs",
+    "typecheck": "tsc -b",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@site-spec/core": "*",
+    "esbuild": "^0.25.0",
+    "zod": "^3.25.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "website-audit",
+    "seo-audit",
+    "ai-searchability",
+    "llms-txt",
+    "structured-data",
+    "accessibility",
+    "site-spec"
+  ],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
