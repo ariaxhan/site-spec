@@ -60,6 +60,6 @@
     "playwright": "^1.60.0",
     "schemarama": "^0.0.4",
     "typescript": "^5.7.0",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.11"
   }
 }
