@@ -27,7 +27,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@modelcontextprotocol/sdk": "^1.32.0",
     "@site-spec/core": "*",
     "esbuild": "^0.25.0",
     "zod": "^3.25.0"
